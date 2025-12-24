@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SWRL Rule Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #2c3e50;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 2px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            border: 1px solid #e1e4e8;
+        }
+
+        header {
+            background: #ffffff;
+            border-bottom: 2px solid #2c3e50;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.2em;
+            margin-bottom: 8px;
+            font-weight: 400;
+            letter-spacing: -0.5px;
+            color: #2c3e50;
+        }
+
+        header p {
+            font-size: 1em;
+            color: #5a6c7d;
+            font-weight: 300;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .input-section {
+            margin-bottom: 40px;
+        }
+
+        .input-section h2 {
+            color: #2c3e50;
+            margin-bottom: 12px;
+            font-size: 1.3em;
+            font-weight: 500;
+            letter-spacing: -0.3px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #d1d5da;
+            border-radius: 3px;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: 13px;
+            resize: vertical;
+            min-height: 120px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: #fafbfc;
+            line-height: 1.6;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #0366d6;
+            box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.1);
+            background: #ffffff;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 24px;
+            border: 1px solid #d1d5da;
+            border-radius: 3px;
+            font-size: 0.95em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #fafbfc;
+            color: #24292e;
+        }
+
+        button span {
+            font-size: 1em;
+        }
+
+        .btn-primary {
+            background: #2c3e50;
+            color: white;
+            border-color: #2c3e50;
+        }
+
+        .btn-primary:hover {
+            background: #1a252f;
+            border-color: #1a252f;
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            color: #24292e;
+        }
+
+        .btn-secondary:hover {
+            background: #f3f4f6;
+            border-color: #b1b7c0;
+        }
+
+        .output-container {
+            margin-top: 40px;
+        }
+
+        .output-section {
+            background: #fafbfc;
+            border-radius: 3px;
+            padding: 20px;
+            border: 1px solid #e1e4e8;
+            margin-bottom: 24px;
+        }
+
+        .output-section.full-width {
+            width: 100%;
+        }
+
+        .output-section h3 {
+            color: #2c3e50;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+        .output-section pre {
+            background: #ffffff;
+            padding: 16px;
+            border-radius: 3px;
+            overflow-x: auto;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: 12.5px;
+            max-height: 400px;
+            border: 1px solid #e1e4e8;
+            line-height: 1.6;
+            color: #24292e;
+        }
+
+        #graph-output {
+            text-align: center;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            border-radius: 3px;
+            border: 1px solid #e1e4e8;
+            padding: 20px;
+        }
+
+        #graph-output svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .example-rules {
+            background: #f6f8fa;
+            border: 1px solid #d1d5da;
+            border-left: 3px solid #0366d6;
+            border-radius: 3px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .example-rules h3 {
+            color: #2c3e50;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+        .example-rule {
+            background: #ffffff;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: 12px;
+            border: 1px solid #e1e4e8;
+            line-height: 1.5;
+        }
+
+        .example-rule:hover {
+            background: #f6f8fa;
+            border-color: #0366d6;
+        }
+
+        .error-message {
+            background: #fff5f5;
+            color: #c53030;
+            padding: 14px 16px;
+            border-radius: 3px;
+            margin-top: 15px;
+            border: 1px solid #feb2b2;
+            display: none;
+            font-size: 0.95em;
+        }
+
+        .success-message {
+            background: #f0fff4;
+            color: #22543d;
+            padding: 14px 16px;
+            border-radius: 3px;
+            margin-top: 15px;
+            border: 1px solid #9ae6b4;
+            display: none;
+            font-size: 0.95em;
+        }
+
+        .copy-btn {
+            padding: 6px 14px;
+            font-size: 0.85em;
+            background: #2c3e50;
+            color: white;
+            border: 1px solid #2c3e50;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #1a252f;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 24px;
+            color: #5a6c7d;
+        }
+
+        .spinner {
+            border: 2px solid #e1e4e8;
+            border-top: 2px solid #2c3e50;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            animation: spin 0.8s linear infinite;
+            margin: 16px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        footer {
+            text-align: center;
+            padding: 24px;
+            background: #fafbfc;
+            color: #6a737d;
+            border-top: 1px solid #e1e4e8;
+            font-size: 0.9em;
+        }
+
+        footer p {
+            margin: 4px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>SWRL Rule Visualizer</h1>
+            <p>Convert Semantic Web Rule Language (SWRL) rules into interactive graph visualizations</p>
+        </header>
+
+        <div class="content">
+            <div class="example-rules">
+                <h3>Example Rules</h3>
+                <div class="example-rule" onclick="loadExample(0)">
+                    bot:Building(?b) ^ bot:hasElement(?b, ?ew) ^ fisa:ExternalWall(?ew) ^ fisa:hasDistanceToBoundary(?ew, 0.0) -> fisa:FireWallAsExternalWall(?ew)
+                </div>
+                <div class="example-rule" onclick="loadExample(1)">
+                    fisa:FireCompartment(?c1) ^ bot:adjacentZone(?c1, ?c2) ^ fisa:FireCompartment(?c2) -> fisa:InternalWall(?w) ^ bot:adjacentElement(?c1, ?w)
+                </div>
+                <div class="example-rule" onclick="loadExample(2)">
+                    bot:Space(?s) ^ fisa:hasOccupancy(?s, ?o) ^ fisa:HighRiskOccupancy(?o) -> fisa:RequiresFireAlarm(?s)
+                </div>
+            </div>
+
+            <div class="input-section">
+                <h2>Input SWRL Rule</h2>
+                <textarea id="swrl-input" placeholder="Enter your SWRL rule here...&#10;Example: bot:Building(?b) ^ bot:hasElement(?b, ?e) -> fisa:Element(?e)"></textarea>
+                <div class="button-group">
+                    <button class="btn-primary" onclick="convertRule()">
+                        Convert to DOT
+                    </button>
+                    <button class="btn-secondary" onclick="clearAll()">
+                        Clear
+                    </button>
+                    <button class="btn-secondary" onclick="downloadDOT()">
+                        Download DOT
+                    </button>
+                    <button class="btn-secondary" onclick="downloadSVG()">
+                        Download SVG
+                    </button>
+                </div>
+                <div class="error-message" id="error-message"></div>
+                <div class="success-message" id="success-message"></div>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Generating visualization...</p>
+            </div>
+
+            <div class="output-container">
+                <div class="output-section full-width">
+                    <h3>Graph Visualization</h3>
+                    <div id="graph-output">
+                        <p style="color: #6a737d;">Your graph visualization will appear here...</p>
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <h3>
+                        DOT Graph Code
+                        <button class="copy-btn" onclick="copyDOT()">Copy</button>
+                    </h3>
+                    <pre id="dot-output">Your DOT graph code will appear here...</pre>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>SWRL Rule Visualizer | Powered by Viz.js</p>
+            <p>Rule Format: Antecedent ^ Antecedent → Consequent ^ Consequent</p>
+        </footer>
+    </div>
+
+    <!-- Viz.js library for DOT rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/@viz-js/viz@3.2.4/lib/viz-standalone.js"></script>
+    <script src="swrl-visualizer.js"></script>
+
+    <script>
+        const examples = [
+            "bot:Building(?b) ^ bot:hasElement(?b, ?ew) ^ fisa:ExternalWall(?ew) ^ fisa:hasDistanceToBoundary(?ew, 0.0) -> fisa:FireWallAsExternalWall(?ew) ^ fisa:hasRequirementOfFireResistance(?ew, fisa:feuerbeständig) ^ fisa:hasRequirementOfFireBehaviour(?ew, fisa:nichtbrennbar) ^ fisa:hasAssessmentBasis(?ew, fisa:MBO_P30_A2_N1_A)",
+            "fisa:FireCompartment(?c1) ^ bot:adjacentZone(?c1, ?c2) ^ fisa:FireCompartment(?c2) -> fisa:InternalWall(?w) ^ bot:adjacentElement(?c1, ?w)",
+            "bot:Space(?s) ^ fisa:hasOccupancy(?s, ?o) ^ fisa:HighRiskOccupancy(?o) -> fisa:RequiresFireAlarm(?s)"
+        ];
+
+        function loadExample(index) {
+            document.getElementById('swrl-input').value = examples[index];
+            hideMessages();
+        }
+
+        function convertRule() {
+            const input = document.getElementById('swrl-input').value.trim();
+            
+            if (!input) {
+                showError('Please enter a SWRL rule');
+                return;
+            }
+
+            hideMessages();
+            showLoading(true);
+
+            try {
+                const converter = new SWRLToDOT();
+                const dotContent = converter.generateDOT(input);
+                
+                document.getElementById('dot-output').textContent = dotContent;
+                
+                // Render graph
+                renderGraph(dotContent);
+                
+                showSuccess('Rule converted successfully!');
+            } catch (error) {
+                showError('Error: ' + error.message);
+                document.getElementById('dot-output').textContent = 'Error generating DOT graph';
+                document.getElementById('graph-output').innerHTML = '<p style="color: #c62828;">Failed to generate graph</p>';
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function renderGraph(dotContent) {
+            try {
+                // Viz.js v3 API
+                const viz = await Viz.instance();
+                const svg = await viz.renderSVGElement(dotContent);
+                
+                const graphOutput = document.getElementById('graph-output');
+                graphOutput.innerHTML = '';
+                graphOutput.appendChild(svg);
+            } catch (error) {
+                console.error('Rendering error:', error);
+                document.getElementById('graph-output').innerHTML = '<p style="color: #c62828;">Failed to render graph: ' + error.message + '</p>';
+            }
+        }
+
+        function clearAll() {
+            document.getElementById('swrl-input').value = '';
+            document.getElementById('dot-output').textContent = 'Your DOT graph code will appear here...';
+            document.getElementById('graph-output').innerHTML = '<p style="color: #999;">Your graph visualization will appear here...</p>';
+            hideMessages();
+        }
+
+        function copyDOT() {
+            const dotContent = document.getElementById('dot-output').textContent;
+            if (dotContent && !dotContent.startsWith('Your DOT')) {
+                navigator.clipboard.writeText(dotContent).then(() => {
+                    showSuccess('DOT code copied to clipboard!');
+                });
+            }
+        }
+
+        function downloadDOT() {
+            const dotContent = document.getElementById('dot-output').textContent;
+            if (dotContent && !dotContent.startsWith('Your DOT')) {
+                const blob = new Blob([dotContent], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'swrl_rule_graph.dot';
+                a.click();
+                URL.revokeObjectURL(url);
+                showSuccess('DOT file downloaded!');
+            } else {
+                showError('Please convert a rule first');
+            }
+        }
+
+        function downloadSVG() {
+            const svg = document.querySelector('#graph-output svg');
+            if (svg) {
+                const svgData = new XMLSerializer().serializeToString(svg);
+                const blob = new Blob([svgData], { type: 'image/svg+xml' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'swrl_rule_graph.svg';
+                a.click();
+                URL.revokeObjectURL(url);
+                showSuccess('SVG file downloaded!');
+            } else {
+                showError('Please convert a rule first');
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('success-message');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        function hideMessages() {
+            document.getElementById('error-message').style.display = 'none';
+            document.getElementById('success-message').style.display = 'none';
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+    </script>
+</body>
+</html>

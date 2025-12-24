@@ -1,0 +1,31 @@
+digraph SWRL_Rule {
+    rankdir=LR;
+    node [shape=box, style=rounded];
+
+    // Classes
+    "bot:Building" [shape=ellipse, fillcolor=lightgreen, style=filled];
+    "fisa:ExternalWall" [shape=ellipse, fillcolor=lightgreen, style=filled];
+    "fisa:FireWallAsExternalWall" [shape=ellipse, fillcolor=lightgreen, style=filled];
+
+    // Variables (Instances)
+    "?b" [label="?b", fillcolor=lightblue, style="rounded,filled"];
+    "?ew" [label="?ew", fillcolor=lightblue, style="rounded,filled"];
+
+    // Literals
+    "0.0" [shape=box, style=filled, fillcolor=lightyellow];
+    "fisa:MBO_P30_A2_N1_A" [shape=box, style=filled, fillcolor=lightyellow];
+    "fisa:feuerbeständig" [shape=box, style=filled, fillcolor=lightyellow];
+    "fisa:nichtbrennbar" [shape=box, style=filled, fillcolor=lightyellow];
+
+    // Class Assertions (rdf:type)
+    "bot:Building" -> "?b" [label="rdf:type", style=dashed];
+    "fisa:ExternalWall" -> "?ew" [label="rdf:type", style=dashed];
+    "fisa:FireWallAsExternalWall" -> "?ew" [label="rdf:type", color=blue, penwidth=2, style=dashed];
+
+    // Properties
+    "?b" -> "?ew" [label="bot:hasElement"];
+    "?ew" -> "0.0" [label="fisa:hasDistanceToBoundary"];
+    "?ew" -> "fisa:feuerbeständig" [label="fisa:hasRequirementOfFireResistance", color=blue, penwidth=2];
+    "?ew" -> "fisa:nichtbrennbar" [label="fisa:hasRequirementOfFireBehaviour", color=blue, penwidth=2];
+    "?ew" -> "fisa:MBO_P30_A2_N1_A" [label="fisa:hasAssessmentBasis", color=blue, penwidth=2];
+}
